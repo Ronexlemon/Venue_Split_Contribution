@@ -3,6 +3,7 @@ pragma solidity ^0.8.2;
 
 contract Party {
     uint rsvpAmount;
+    uint venueAmount;
     address[] groupMembers;
     //maping to store the address of the already rsvp members
     mapping(address => bool) public hasRsvp;
@@ -21,13 +22,20 @@ contract Party {
     }
     //paybill for the party
     function payBill(address venue,uint Amount) external payable{
+        venueAmount = Amount;
         (bool sent,) = venue.call{value: Amount}("");
-        require(sent);
+        require(sent,"no transaction sent");
         uint amountToReturn = address(this).balance /groupMembers.length;
         for(uint i; i< groupMembers.length; i++){
             (bool returnAmount,) = groupMembers[i].call{value:amountToReturn}("");
-            require(returnAmount);
+            require(returnAmount,"no transaction sent");
         }
 
+    }
+    function returnAmountToPay()public view returns(uint){
+        return rsvpAmount;
+    }
+    function returnVenueAmount()public view returns(uint){
+        return venueAmount;
     }
 }
