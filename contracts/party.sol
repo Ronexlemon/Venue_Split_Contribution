@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Party {
+    using SafeMath for uint;
     uint rsvpAmount;
     uint venueAmount;
     address[] groupMembers;
@@ -22,6 +24,7 @@ contract Party {
         payable(address(this)).transfer(msg.value);
         hasRsvp[msg.sender] = true;
         status = true;
+        groupMembers.push(msg.sender);
     }
 
     //paybill for the party
@@ -29,7 +32,10 @@ contract Party {
         venueAmount = Amount;
         (bool sent, ) = venue.call{value: Amount}("");
         require(sent, "no transaction sent");
-        uint amountToReturn = address(this).balance / groupMembers.length;
+        require(groupMembers.length != 0, "no members");
+        uint amountToReturn = address(this).balance.mul(1).div(
+            groupMembers.length
+        );
         for (uint i; i < groupMembers.length; i++) {
             (bool returnAmount, ) = groupMembers[i].call{value: amountToReturn}(
                 ""
