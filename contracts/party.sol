@@ -19,4 +19,15 @@ contract Party {
         require(success);
         hasRsvp[msg.sender] = true;
     }
+    //paybill for the party
+    function payBill(address venue,uint Amount) external payable{
+        (bool sent,) = venue.call{value: Amount}("");
+        require(sent);
+        uint amountToReturn = address(this).balance /groupMembers.length;
+        for(uint i; i< groupMembers.length; i++){
+            (bool returnAmount,) = groupMembers[i].call{value:amountToReturn}("");
+            require(returnAmount);
+        }
+
+    }
 }
